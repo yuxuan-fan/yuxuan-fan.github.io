@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        const countryData = {
+            "CN": { "name": "China", "info": "Your content here" },
+            "US": { "name": "United States", "info": "Your content here" },
+            "JP": { "name": "Japan", "info": "Your content here" }
+        };
+        fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
+            .then(res => res.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    onEachFeature: (feature, layer) => {
+                        const iso = feature.id;
+                        const info = countryData[iso] || { name: feature.properties.name, info: "No content yet" };
+                        layer.bindPopup(`<b>${info.name}</b><br>${info.info}`);
+                    }
+                }).addTo(map);
+            });
+    </script>
+</body>
+</html>
