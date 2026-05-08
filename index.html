@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球疫情数据地图</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body, #map { height: 100%; width: 100%; }
+        #map { background-color: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map', { minZoom: 2, maxZoom: 10 }).setView([25, 0], 2);
+
+        // 国家数据：ISO代码 -> {名称, 病人数}
+        const countryData = {
+            "CN": { name: "中国", cases: 123456 },
+            "US": { name: "美国", cases: 789012 },
+            "JP": { name: "日本", cases: 345678 },
+            "GB": { name: "英国", cases: 234567 },
+            "FR": { name: "法国", cases: 198765 }
+        };
+
+        // 加载世界地图矢量边界并绑定点击事件
+        fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
+            .then(res => res.json())
+            .then(geoData => {
+                L.geoJSON(geoData, {
+                    style: { fillColor: "#3388ff", weight: 1, color: "#fff", fillOpacity: 0.7 },
+                    onEachFeature: (feature, layer) => {
+                        const iso = feature.id;
+                        const data = countryData[iso] || { name: feature.properties.name, cases: "暂无数据" };
+                        layer.bindPopup(`<b>${data.name}</b><br>病人数：${data.cases}`);
+                    }
+                }).addTo(map);
+            });
+    </script>
+</body>
+</html>
